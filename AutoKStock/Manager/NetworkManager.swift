@@ -8,22 +8,35 @@
 import Foundation
 
 class NetworkManager {
-    private var queryItems = [URLQueryItem]()
+    private var queryItems: [URLQueryItem]?
     private var urlComponents: URLComponents?
     private var method: HTTPMethod? = .GET
     private var body: Encodable?
     
     init() {
-        urlComponents = URLComponents(string: NetworkData.domain)
+        
+        let domain = if Configuration.shared.ismockEnvironment {
+            "https://openapivts.koreainvestment.com:29443"
+        } else {
+            "https://openapi.koreainvestment.com:9443"
+        }
+            
+        
+        urlComponents = URLComponents(string: domain)
     }
     
+    // TODO: 이거 뭔가 깔끔하지 않아 수정 가능할지도?
     func path(_ path: PriceURL) -> Self {
         urlComponents?.path = path.rawValue
         return self
     }
     
-    // TODO: 이거 뭔가 깔끔하지 않아 수정 가능할지도?
     func path(_ path: OrderURL) -> Self {
+        urlComponents?.path = path.rawValue
+        return self
+    }
+    
+    func path(_ path: TokenURL) -> Self {
         urlComponents?.path = path.rawValue
         return self
     }
@@ -34,7 +47,11 @@ class NetworkManager {
     }
     
     func addHeader(name: String, value: String?) -> Self {
-        queryItems.append(URLQueryItem(name: name, value: value))
+        if queryItems == nil {
+            self.queryItems = .init()
+        }
+        
+        queryItems?.append(URLQueryItem(name: name, value: value))
         return self
     }
     
@@ -44,11 +61,16 @@ class NetworkManager {
     }
     
     func decode<T: Decodable>() async throws -> T {
-        urlComponents?.queryItems = queryItems
+        urlComponents?.queryItems = self.queryItems
         
         guard let url = urlComponents?.url else { throw NetworkError.URLError }
+        var request = URLRequest(url: url)
+        request.httpMethod = method?.rawValue
         
-        let request = URLRequest(url: url)
+        if let body {
+            request.httpBody = try JSONEncoder().encode(body)
+        }
+        
         let (data, rawResponse) = try await URLSession.shared.data(for: request)
         
         
