@@ -14,15 +14,15 @@ final class Configuration {
     var ismockEnvironment = true
     
     lazy var AppKey = if ismockEnvironment {
-        MockAppKey
+        mockAppKey
     } else {
-        AppKey
+        appKey
     }
     
     lazy var AppSecret = if ismockEnvironment {
-        MockAppSecret
+        mockAppSecret
     } else {
-        AppSecret
+        appSecret
     }
     
     var accessToken: String? {
