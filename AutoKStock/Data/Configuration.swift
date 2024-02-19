@@ -13,20 +13,14 @@ final class Configuration {
     
     var ismockEnvironment = true
     
-    lazy var AppKey = if ismockEnvironment {
-        mockAppKey
-    } else {
-        appKey
-    }
-    
-    lazy var AppSecret = if ismockEnvironment {
-        mockAppSecret
-    } else {
-        appSecret
-    }
+    lazy var AppKey = ismockEnvironment ? mockAppKey : appKey
+    lazy var AppSecret = ismockEnvironment ? mockAppSecret : appSecret
     
     var accessToken: String? {
         set {
+            if let token = newValue {
+                print("토큰발급완료:\n", token)
+            }
             rawToken = newValue
         }
         get {
@@ -37,6 +31,9 @@ final class Configuration {
             }
         }
     }
+    
+    lazy var accountNumber: String = ismockEnvironment ? mockAccountNumber : accountNumber
+    var accountProductCode: String = "01"
     
     var rawToken: String?
 }
