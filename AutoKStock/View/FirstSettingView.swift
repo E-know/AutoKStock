@@ -8,11 +8,7 @@
 import SwiftUI
 
 struct FirstSettingView: View {
-    @State private var mockEnvironment = true {
-        didSet {
-            Configuration.shared.ismockEnvironment = mockEnvironment
-        }
-    }
+    @State private var mockEnvironment = true
     @State private var path = [Int]()
 
     var body: some View {
@@ -26,34 +22,37 @@ struct FirstSettingView: View {
                 }
                 .pickerStyle(SegmentedPickerStyle())
                 
-                Button(action: { getToken() }, label: {
+                Button(action: { goHomeView() } ) {
                     Text("입 장")
-                })
+                }
             }
             .navigationDestination(for: Int.self, destination: { _ in
-                Text("안뇽")
+                HomeView()
             })
         }
     }
     
-    private func getToken() {
+    private func goHomeView() {
+        Configuration.shared.ismockEnvironment = mockEnvironment
+        
         Task {
-            do {
-                let response: IssueTokenOutput = try await NetworkManager()
-                    .method(method: .POST)
-                    .path(.issue)
-                    .addBody(IssueTokenInput())
-                    .decode()
-                
-                Configuration.shared.accessToken = response.accessToken
-                
-                withAnimation{
-                    path.append(0)
-                }
-                
-            } catch {
-                print(error.localizedDescription)
-            }
+            await getToken()
+            path.append(0)
+        }
+    }
+    
+    private func getToken() async {
+        do {
+            let response: IssueTokenData = try await NetworkManager()
+                .method(method: .POST)
+                .path(URLType.TokenURL(.issue))
+                .addBody(IssueTokenBody())
+                .decode()
+            
+            Configuration.shared.accessToken = response.accessToken
+            
+        } catch {
+            print(error.localizedDescription)
         }
     }
 }
