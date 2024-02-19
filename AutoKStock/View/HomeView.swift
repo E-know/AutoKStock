@@ -10,7 +10,7 @@ import SwiftUI
 struct HomeView: View {
     @State var balance: BalanceData?
     @State var productNumber = ""
-    @State var searchResult: StockInfoData?
+    var vm = HomeViewModel()
     
     var body: some View {
         VStack {
@@ -33,15 +33,81 @@ struct HomeView: View {
             HStack {
                 VStack {
                     TextField("종목번호로 검색하세요.", text: $productNumber)
-                        .onSubmit { Task {
-                            self.searchResult = try await PriceManager.shared.getStockInfo(productNumber: productNumber)
-                            print(searchResult)
+                        .onSubmit {
+                            do {
+                                vm.searchResult = try StockInfoManager.shared.getStockFromName(productCode: productNumber)
+                            } catch {
+                                print(error.localizedDescription)
+                            }
                         }
-                        }
-                    if let searchResult {
+                    if let searchResult = vm.searchResult {
+                        Text(searchResult.name)
                         
+                        Button(action: { vm.appendCandidate(candidate: searchResult) } ) {
+                            Text("➡️")
+                        }
+                    }
+                    
+                    Spacer()
+                }
+                .padding()
+                .frame(width: Configuration.shared.screenSize.width / 3)
+                
+                VStack {
+                    if vm.candidates.count > 0 {
+                        Text("후보 주식 목록")
+                        
+                        HStack {
+                            List {
+                                ForEach(vm.candidates, id: \.productCode) { stockInfo in
+                                    HStack {
+                                        Text("\(stockInfo.productCode) | \(stockInfo.name)")
+                                        
+                                        Spacer()
+                                        
+                                        Button(action: { vm.removeCandidate(candidate: stockInfo)} ) {
+                                            Text("⬅️")
+                                        }
+                                        .padding()
+                                        
+                                        Button(action: { vm.moveCandidateToWatchList(candidate: stockInfo)} ) {
+                                            Text("➡️")
+                                        }
+                                        .padding()
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
+                .padding()
+                .frame(width: Configuration.shared.screenSize.width / 3)
+                
+                VStack {
+                    if vm.watchList.count > 0 {
+                        Text("주시 주식 목록")
+                        
+                        HStack {
+                            List {
+                                ForEach(vm.watchList, id: \.productCode) { stockInfo in
+                                    HStack {
+                                        Text("\(stockInfo.productCode) | \(stockInfo.name)")
+                                        
+                                        Spacer()
+                                        
+                                        Button(action: { vm.removeWatchList(candidate: stockInfo)} ) {
+                                            Text("⬅️")
+                                        }
+                                        .padding()
+                                        
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                .padding()
+                .frame(width: Configuration.shared.screenSize.width / 3)
             }
             
             Spacer()
@@ -53,6 +119,7 @@ struct HomeView: View {
                 print(error.localizedDescription)
             }
         }
+        .navigationBarBackButtonHidden()
     }
     
     private func revokeToken() async {
@@ -68,4 +135,32 @@ struct HomeView: View {
 
 #Preview {
     HomeView()
+}
+
+@Observable final class HomeViewModel {
+    var candidates = [StockInfo]()
+    var searchResult: StockInfo?
+    var watchList = [StockInfo]()
+    
+    func appendCandidate(candidate: StockInfo) {
+        candidates.append(candidate)
+    }
+    
+    func removeCandidate(candidate: StockInfo) {
+        candidates.removeAll(where: { candidate == $0 })
+    }
+    
+    func moveCandidateToWatchList(candidate: StockInfo) {
+        candidates.removeAll(where: {candidate == $0 })
+        appendWatchList(candidate: candidate)
+    }
+    
+    func appendWatchList(candidate: StockInfo) {
+        watchList.append(candidate)
+    }
+    
+    func removeWatchList(candidate: StockInfo) {
+        watchList.removeAll(where: {candidate == $0})
+        appendCandidate(candidate: candidate)
+    }
 }
