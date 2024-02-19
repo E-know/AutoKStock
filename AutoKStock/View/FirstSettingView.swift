@@ -36,24 +36,20 @@ struct FirstSettingView: View {
         Configuration.shared.ismockEnvironment = mockEnvironment
         
         Task {
-            await getToken()
-            path.append(0)
+            do {
+                try await getToken()
+                path.append(0)
+            } catch {
+                print(error.localizedDescription)
+                print("토큰 발급에 실패했습니다.")
+            }
         }
     }
     
-    private func getToken() async {
-        do {
-            let response: IssueTokenData = try await NetworkManager()
-                .method(method: .POST)
-                .path(URLType.TokenURL(.issue))
-                .addBody(IssueTokenBody())
-                .decode()
-            
-            Configuration.shared.accessToken = response.accessToken
-            
-        } catch {
-            print(error.localizedDescription)
-        }
+    private func getToken() async throws {
+        let response = try await TokenManager.shared.getToken()
+        
+        Configuration.shared.accessToken = response.accessToken
     }
 }
 
