@@ -11,7 +11,9 @@ class NetworkManager {
     private var queryItems: [URLQueryItem]?
     private var urlComponents: URLComponents?
     private var method: HTTPMethod? = .GET
-    private var body: Encodable?
+    private var bodyStruct: Encodable?
+    private var bodyDict: [String: Any]?
+    private var header: [(field: String, value: String?)]?
     
     init() {
         
@@ -26,27 +28,18 @@ class NetworkManager {
     }
     
     // TODO: 이거 뭔가 깔끔하지 않아 수정 가능할지도?
-    func path(_ path: PriceURL) -> Self {
-        urlComponents?.path = path.rawValue
+    func path(_ path: URLType) -> Self {
+        urlComponents?.path = path.path
         return self
     }
     
-    func path(_ path: OrderURL) -> Self {
-        urlComponents?.path = path.rawValue
-        return self
-    }
-    
-    func path(_ path: TokenURL) -> Self {
-        urlComponents?.path = path.rawValue
-        return self
-    }
     
     func method(method: HTTPMethod) -> Self {
         self.method = method
         return self
     }
     
-    func addHeader(name: String, value: String?) -> Self {
+    func addQuery(name: String, value: String?) -> Self {
         if queryItems == nil {
             self.queryItems = .init()
         }
@@ -55,9 +48,25 @@ class NetworkManager {
         return self
     }
     
-    func addBody(_ body: Encodable) -> Self {
-        self.body = body
+    
+    func addHeader(field: String, value: String?) -> Self {
+        if header == nil {
+            self.header = .init()
+        }
+        header?.append((field: field, value: value))
         return self
+    }
+    
+    func addBody(_ body: Encodable) -> Self {
+        self.bodyStruct = body
+        return self
+    }
+    
+    func addBody(_ key: String, value: Any) {
+        if bodyDict == nil {
+            bodyDict = .init()
+        }
+        bodyDict?[key] = value
     }
     
     func decode<T: Decodable>() async throws -> T {
@@ -67,18 +76,24 @@ class NetworkManager {
         var request = URLRequest(url: url)
         request.httpMethod = method?.rawValue
         
-        if let body {
-            request.httpBody = try JSONEncoder().encode(body)
+        if let bodyStruct {
+            request.httpBody = try JSONEncoder().encode(bodyStruct)
+        } else if let bodyDict {
+            request.httpBody = try JSONSerialization.data(withJSONObject: bodyDict)
+        }
+        
+        if let header {
+            for (field, value) in header {
+                request.setValue(value, forHTTPHeaderField: field)
+            }
         }
         
         let (data, rawResponse) = try await URLSession.shared.data(for: request)
         
-        
         guard let response = rawResponse as? HTTPURLResponse, response.statusCode == 200 else {
             throw NetworkError.ResponseError
         }
-        
-        
+
         let jsonData = try JSONDecoder().decode(T.self, from: data)
         
         return jsonData
