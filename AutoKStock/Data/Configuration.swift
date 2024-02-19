@@ -26,11 +26,17 @@ final class Configuration {
     }
     
     var accessToken: String? {
-        didSet {
-            if let accessToken {
-                print("토큰 설정 완료: \(accessToken)")
+        set {
+            rawToken = newValue
+        }
+        get {
+            if let rawToken {
+                "Bearer " + rawToken
+            } else {
+                nil
             }
         }
     }
+    
+    var rawToken: String?
 }
-
