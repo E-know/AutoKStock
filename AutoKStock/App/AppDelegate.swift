@@ -10,7 +10,7 @@ import SwiftUI
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
-        print("HI")
+        
     }
     
     func applicationWillTerminate(_ notification: Notification) {
@@ -18,7 +18,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if let token = Configuration.shared.accessToken {
             print(token)
         }
-            
+        
         print("안전하게 종료되었습니다.")
     }
 }
