@@ -11,6 +11,7 @@ class PriceManager {
     private init() {}
     static let shared = PriceManager()
     
+    
     func getCurrentPrice(productNumber: String) async throws -> CurrentStockPriceData {
         let response: CurrentStockPriceData = try await NetworkManager()
             .method(method: .GET)
@@ -32,6 +33,16 @@ class PriceManager {
         let response: StockInfoData = try await NetworkManager()
             .method(method: .GET)
             .path(URLType.PriceURL(.info))
-            
+            .addHeader(field: "content-type", value: "application/json; charset=utf-8")
+            .addHeader(field: "authorization", value: Configuration.shared.accessToken)
+            .addHeader(field: "appkey", value: Configuration.shared.AppKey)
+            .addHeader(field: "appsecret", value: Configuration.shared.AppSecret)
+            .addHeader(field: "tr_id", value: "CTPF1002R")
+            .addHeader(field: "custtype", value: "P")
+            .addQuery(name: "PRDT_TYPE_CD", value: "300")
+            .addQuery(name: "PDNO", value: productNumber)
+            .decode()
+        
+        return response
     }
 }
