@@ -5,7 +5,7 @@
 //  Created by Inho Choi on 2/16/24.
 //
 
-import Foundation
+import AppKit
 
 final class Configuration {
     private init() { }
@@ -42,4 +42,7 @@ final class Configuration {
     var accountProductCode: String = "01"
     
     lazy var rawToken: String? = UserDefaults.standard.string(forKey: tokenUserdefaultsKey)
+    
+    
+    let screenSize = CGSize(width: NSScreen.main!.frame.size.width / 2, height: NSScreen.main!.frame.size.height / 2) // 지금 보여지고 있는 화면 기준 크기 4K 
 }
