@@ -7,15 +7,35 @@
 
 import Foundation
 
-enum PriceURL: String {
-    case now = "/uapi/domestic-stock/v1/quotations/inquire-price"
-}
+enum URLType {
+    case PriceURL(priceURL)
+    case OrderURL(orderURL)
+    case TokenURL(tokenURL)
 
-enum OrderURL: String {
-    case buy = "A"
-}
+    enum priceURL: String {
+        case now = "/uapi/domestic-stock/v1/quotations/inquire-price"
+        case volumeRanking = "/uapi/domestic-stock/v1/quotations/volume-rank"
+    }
 
-enum TokenURL: String {
-    case issue = "/oauth2/tokenP"
-    case revoke = "/oauth2/revokeP"
+    enum orderURL: String {
+        case buy = "/uapi/domestic-stock/v1/trading/order-cash"
+    }
+
+    enum tokenURL: String {
+        case issue = "/oauth2/tokenP"
+        case revoke = "/oauth2/revokeP"
+    }
+    
+    
+
+    var path: String {
+        switch self {
+        case .PriceURL(let type):
+            return type.rawValue
+        case .OrderURL(let type):
+            return type.rawValue
+        case .TokenURL(let type):
+            return type.rawValue
+        }
+    }
 }
