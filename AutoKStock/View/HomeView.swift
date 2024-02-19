@@ -10,7 +10,7 @@ import SwiftUI
 struct HomeView: View {
     @State var balance: BalanceData?
     @State var productNumber = ""
-    @State var searchResult: CurrentStockPriceData?
+    @State var searchResult: StockInfoData?
     
     var body: some View {
         VStack {
@@ -34,7 +34,7 @@ struct HomeView: View {
                 VStack {
                     TextField("종목번호로 검색하세요.", text: $productNumber)
                         .onSubmit { Task {
-                            self.searchResult = try await PriceManager.shared.(productNumber: productNumber)
+                            self.searchResult = try await PriceManager.shared.getStockInfo(productNumber: productNumber)
                             print(searchResult)
                         }
                         }

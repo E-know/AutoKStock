@@ -35,14 +35,18 @@ struct FirstSettingView: View {
     private func goHomeView() {
         Configuration.shared.ismockEnvironment = mockEnvironment
         
-        Task {
-            do {
-                try await getToken()
-                path.append(0)
-            } catch {
-                print(error.localizedDescription)
-                print("토큰 발급에 실패했습니다.")
+        if Configuration.shared.rawToken == nil {
+            Task {
+                do {
+                    try await getToken()
+                    path.append(0)
+                } catch {
+                    print(error.localizedDescription)
+                    print("토큰 발급에 실패했습니다.")
+                }
             }
+        } else {
+            path.append(0)
         }
     }
     
