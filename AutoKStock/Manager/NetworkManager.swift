@@ -12,7 +12,7 @@ class NetworkManager {
     private var urlComponents: URLComponents?
     private var method: HTTPMethod? = .GET
     private var bodyStruct: Encodable?
-    private var bodyDict: [String: Any]?
+    private var bodyDict: [String: Any?]?
     private var header: [(field: String, value: String?)]?
     
     init() {
@@ -57,16 +57,17 @@ class NetworkManager {
         return self
     }
     
-    func addBody(_ body: Encodable) -> Self {
-        self.bodyStruct = body
-        return self
-    }
+//    func addBody(_ body: Encodable) -> Self {
+//        self.bodyStruct = body
+//        return self
+//    }
     
-    func addBody(_ key: String, value: Any) {
+    func addBody(key: String, value: Any?) -> Self {
         if bodyDict == nil {
             bodyDict = .init()
         }
         bodyDict?[key] = value
+        return self
     }
     
     func decode<T: Decodable>() async throws -> T {
@@ -90,23 +91,34 @@ class NetworkManager {
         
         let (data, rawResponse) = try await URLSession.shared.data(for: request)
         
+        print(data.description!)
+        
         guard let response = rawResponse as? HTTPURLResponse, response.statusCode == 200 else {
             throw NetworkError.ResponseError
         }
-
-        let jsonData = try JSONDecoder().decode(T.self, from: data)
+        
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        
+        let jsonData = try decoder.decode(T.self, from: data) // Error: The data couldn’t be read because it is missing.
         
         return jsonData
     }
 }
 
 
-enum NetworkError: Error {
+enum NetworkError: LocalizedError {
     case RequestIsNil
     case ResponseError
     case URLError
-    case URLComponentsError
-    case QueryItemError
+    
+    public var errorDescription: String? {
+        switch self {
+        case .RequestIsNil: "Requset 생성에 실패했습니다."
+        case .ResponseError: "HTTPURLResponse가 200이 아닙니다"
+        case .URLError: "URL 생성에 실패했습니다."
+        }
+    }
 }
 
 enum HTTPMethod: String {
