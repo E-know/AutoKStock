@@ -9,7 +9,7 @@ import SwiftUI
 
 struct HomeView: View {
     @State var balance: BalanceData?
-    @State var productNumber = ""
+    @State var productTerm = ""
     var vm = HomeViewModel()
     
     var body: some View {
@@ -32,14 +32,11 @@ struct HomeView: View {
             
             HStack {
                 VStack {
-                    TextField("종목번호로 검색하세요.", text: $productNumber)
+                    TextField("종목번호, 혹은 이름으로 검색하세요.", text: $productTerm)
                         .onSubmit {
-                            do {
-                                vm.searchResult = try StockInfoManager.shared.getStockFromName(productCode: productNumber)
-                            } catch {
-                                print(error.localizedDescription)
-                            }
+                            vm.setCandidate(term: productTerm)
                         }
+                    
                     if let searchResult = vm.searchResult {
                         Text(searchResult.name)
                         
@@ -71,11 +68,10 @@ struct HomeView: View {
                                         .padding()
                                         
                                         Button(action: {
-                                            vm.moveCandidateToWatchList(candidate: stockInfo)
                                             Task {
                                                 let response = try await PriceManager.shared.getPricePerMin(productNumber: stockInfo.productCode)
-                                                print(response)
-                                                print(response.output2.count)
+                                                // TODO: 얻은 가격으로 무엇을 할 것인가?
+                                                vm.moveCandidateToWatchList(candidate: stockInfo)
                                             }
                                         } ) {
                                             Text("➡️")
@@ -120,6 +116,7 @@ struct HomeView: View {
             Spacer()
         }
         .task {
+            print(Configuration.shared.tokenDescription)
             do {
                 self.balance = try await OrderManager.shared.fetchBalance()
             } catch {
@@ -133,6 +130,7 @@ struct HomeView: View {
         do {
             let response = try await TokenManager.shared.revokeToken()
             Configuration.shared.accessToken = nil
+            Configuration.shared.tokenExpiredDate = nil
             print(response.message)
         } catch {
             print(error.localizedDescription)
@@ -150,6 +148,7 @@ struct HomeView: View {
     var watchList = [StockInfo]()
     
     func appendCandidate(candidate: StockInfo) {
+        searchResult = nil
         candidates.append(candidate)
     }
     
@@ -169,5 +168,24 @@ struct HomeView: View {
     func removeWatchList(candidate: StockInfo) {
         watchList.removeAll(where: {candidate == $0})
         appendCandidate(candidate: candidate)
+    }
+    
+    func setCandidate(term: String) {
+        
+        if let _ = Int(term) {
+            do {
+                searchResult = try StockInfoManager.shared.getStockFromName(productCode: term)
+            } catch {
+                searchResult = nil
+                print(error.localizedDescription)
+            }
+        } else {
+            do {
+                searchResult = try StockInfoManager.shared.getStockFromCode(name: term.uppercased())
+            } catch {
+                searchResult = nil
+                print(error.localizedDescription)
+            }
+        }
     }
 }

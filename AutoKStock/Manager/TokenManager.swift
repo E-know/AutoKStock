@@ -20,6 +20,9 @@ class TokenManager {
             .addBody(key: "appsecret", value: Configuration.shared.AppSecret)
             .decode()
         
+        print("토큰 발급 완료\n\(response.accessToken)")
+        print("만료일자: \(response.accessTokenTokenExpired)")
+        
         return response
     }
     

@@ -35,7 +35,7 @@ struct FirstSettingView: View {
     private func goHomeView() {
         Configuration.shared.ismockEnvironment = mockEnvironment
         
-        if Configuration.shared.rawToken == nil {
+        if Configuration.shared.isTokenExpired {
             Task {
                 do {
                     try await getToken()
@@ -54,6 +54,9 @@ struct FirstSettingView: View {
         let response = try await TokenManager.shared.getToken()
         
         Configuration.shared.accessToken = response.accessToken
+        let df = DateFormatter()
+        df.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        Configuration.shared.tokenExpiredDate = df.date(from: response.accessTokenTokenExpired)
     }
 }
 

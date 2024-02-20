@@ -49,7 +49,6 @@ class PriceManager {
     func getPricePerMin(productNumber: String) async throws -> PricePerMinData {
         var time = Date.krStockOpenDate.addingTimeInterval(60 * 30) // + 30분
         let now = Date.now < Date.krStockCloseDate ? Date.now : Date.krStockCloseDate
-        print(now.toString)
         var data = Set<PriceMinuteData>()
         let network = NetworkManager()
             .method(method: .GET)
@@ -80,7 +79,6 @@ class PriceManager {
             
             usleep(250000) // 0.25sec
         }
-        print("DONE")
         
         var response: PricePerMinData = try await network
             .addQuery(name: "FID_INPUT_HOUR_1", value: Date.now.toString)
