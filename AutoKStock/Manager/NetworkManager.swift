@@ -8,7 +8,7 @@
 import Foundation
 
 class NetworkManager {
-    private var queryItems: [URLQueryItem]?
+    private var queryDic: [String: String?]? // key(name) : value
     private var urlComponents: URLComponents?
     private var method: HTTPMethod? = .GET
     private var bodyStruct: Encodable?
@@ -40,11 +40,12 @@ class NetworkManager {
     }
     
     func addQuery(name: String, value: String?) -> Self {
-        if queryItems == nil {
-            self.queryItems = .init()
+        if queryDic == nil {
+            self.queryDic = .init()
         }
         
-        queryItems?.append(URLQueryItem(name: name, value: value))
+        queryDic?[name] = value
+//        queryItems?.append(URLQueryItem(name: name, value: value))
         return self
     }
     
@@ -71,7 +72,13 @@ class NetworkManager {
     }
     
     func decode<T: Decodable>() async throws -> T {
-        urlComponents?.queryItems = self.queryItems
+        if let queryDic {
+            var queryItems = [URLQueryItem]()
+            for (name, value) in queryDic {
+                queryItems.append(URLQueryItem(name: name, value: value))
+            }
+            urlComponents?.queryItems = queryItems
+        }
         
         guard let url = urlComponents?.url else { throw NetworkError.URLError }
         var request = URLRequest(url: url)
@@ -91,14 +98,22 @@ class NetworkManager {
         
         let (data, rawResponse) = try await URLSession.shared.data(for: request)
         
-        print(data.description!)
-        
-        guard let response = rawResponse as? HTTPURLResponse, response.statusCode == 200 else {
-            throw NetworkError.ResponseError
-        }
-        
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
+        
+//        print(data.description!)
+        
+        guard let response = rawResponse as? HTTPURLResponse, response.statusCode == 200 else {
+            do {
+                let jsonData = try decoder.decode(ErrorMessage.self, from: data)
+                print(jsonData.description)
+            } catch {
+                print(error.localizedDescription)
+            }
+            throw NetworkError.ResponseError
+        }
+//        print(response.allHeaderFields)
+
         
         let jsonData = try decoder.decode(T.self, from: data) // Error: The data couldn’t be read because it is missing.
         
