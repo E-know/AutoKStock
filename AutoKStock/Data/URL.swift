@@ -16,6 +16,7 @@ enum URLType {
         case current = "/uapi/domestic-stock/v1/quotations/inquire-price"
         case volumeRanking = "/uapi/domestic-stock/v1/quotations/volume-rank"
         case info = "/uapi/domestic-stock/v1/quotations/search-stock-info"
+        case pricePerMin = "/uapi/domestic-stock/v1/quotations/inquire-time-itemchartprice"
     }
 
     enum orderURL: String {

@@ -70,7 +70,14 @@ struct HomeView: View {
                                         }
                                         .padding()
                                         
-                                        Button(action: { vm.moveCandidateToWatchList(candidate: stockInfo)} ) {
+                                        Button(action: {
+                                            vm.moveCandidateToWatchList(candidate: stockInfo)
+                                            Task {
+                                                let response = try await PriceManager.shared.getPricePerMin(productNumber: stockInfo.productCode)
+                                                print(response)
+                                                print(response.output2.count)
+                                            }
+                                        } ) {
                                             Text("➡️")
                                         }
                                         .padding()

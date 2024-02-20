@@ -17,3 +17,13 @@ enum EnvError: Error, LocalizedError {
         }
     }
 }
+
+struct ErrorMessage: Decodable {
+    let rtCd: String
+    let msgCd: String
+    let msg1: String
+    
+    var description: String {
+        "Server] ErrorCode: \(msgCd)\nMessage: \(msg1)\nrtCd: \(rtCd)"
+    }
+}
