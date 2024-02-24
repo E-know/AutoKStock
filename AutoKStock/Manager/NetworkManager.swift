@@ -84,9 +84,7 @@ class NetworkManager {
         var request = URLRequest(url: url)
         request.httpMethod = method?.rawValue
         
-        if let bodyStruct {
-            request.httpBody = try JSONEncoder().encode(bodyStruct)
-        } else if let bodyDict {
+        if let bodyDict {
             request.httpBody = try JSONSerialization.data(withJSONObject: bodyDict)
         }
         
@@ -95,6 +93,8 @@ class NetworkManager {
                 request.setValue(value, forHTTPHeaderField: field)
             }
         }
+        
+//        print(request.description)
         
         let (data, rawResponse) = try await URLSession.shared.data(for: request)
         

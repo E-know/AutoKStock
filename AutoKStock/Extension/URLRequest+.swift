@@ -12,7 +12,7 @@ extension URLRequest {
         var result = "\n"
         
         if let url = self.url {
-            result += "URL: \(url.absoluteString)"
+            result += "URL: \(url.absoluteString)\n"
         }
         
         if let allHTTPHeaderFields {
@@ -28,7 +28,7 @@ extension URLRequest {
                 result += "Body\n"
                 
                 for (key, value) in json {
-                    print("\(key): \(value)\n")
+                    result += "\(key): \(value)\n"
                 }
             }
         } catch {

@@ -54,16 +54,6 @@ struct PriceChartView: View {
                         }
                 }
                 .frame(width: CGFloat(15 * data.output2.count))
-
-                .onAppear {
-                    print(Date.krStockOpenDate, Date.krStockCloseDate)
-                    print(data.output2.count)
-                    print(Date.krStockOpenDate.timeIntervalSince(Date.krStockCloseDate))
-                    
-                    data.output2.forEach {
-                        print($0.timeDate)
-                    }
-                }
             }
         }
     }
