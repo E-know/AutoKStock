@@ -35,3 +35,7 @@ struct RevokeTokenData: Decodable {
     let code: Int
     let message: String
 }
+
+struct RealTimeAccessTokenData: Decodable {
+    let approvalKey: String
+}

@@ -11,6 +11,7 @@ enum URLType {
     case PriceURL(priceURL)
     case OrderURL(orderURL)
     case TokenURL(tokenURL)
+    case SocketURL(socketURL)
 
     enum priceURL: String {
         case current = "/uapi/domestic-stock/v1/quotations/inquire-price"
@@ -27,9 +28,12 @@ enum URLType {
     enum tokenURL: String {
         case issue = "/oauth2/tokenP"
         case revoke = "/oauth2/revokeP"
+        case socket = "/oauth2/Approval"
     }
     
-    
+    enum socketURL: String {
+        case realTimeConclusionPrice = "/tryitout/H0STCNT0"
+    }
 
     var path: String {
         switch self {
@@ -38,6 +42,8 @@ enum URLType {
         case .OrderURL(let type):
             return type.rawValue
         case .TokenURL(let type):
+            return type.rawValue
+        case .SocketURL(let type):
             return type.rawValue
         }
     }

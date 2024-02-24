@@ -18,6 +18,7 @@ final class Configuration {
     
     private lazy var tokenUserdefaultsKey: String = ismockEnvironment ? "mockToken" : "realToken"
     private let tokenExpieredDateKey = "tokenExpiredDate"
+    private lazy var realTimeTokenKey = ismockEnvironment ? "mockRealTimeToken" : "realTimeToken"
     
     var accessToken: String? {
         set {
@@ -36,6 +37,7 @@ final class Configuration {
             }
         }
     }
+    
     var tokenExpiredDate: Date? {
         set {
             UserDefaults.standard.setValue(newValue, forKey: tokenExpieredDateKey)
@@ -72,4 +74,18 @@ final class Configuration {
         
         return result
     }
+    
+    var realTimeToken: String? {
+        get {
+            realTimeTokenRaw
+        }
+        
+        set {
+            UserDefaults.standard.setValue(newValue, forKey: realTimeTokenKey)
+            realTimeTokenRaw = newValue
+            print("실시간 접속키 발급이 완료되었습니다. \(newValue)")
+        }
+    }
+    
+    lazy var realTimeTokenRaw: String? = UserDefaults.standard.string(forKey: self.realTimeTokenKey)
 }

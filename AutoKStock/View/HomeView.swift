@@ -10,7 +10,7 @@ import SwiftUI
 struct HomeView: View {
     @State var balance: BalanceData?
     @State var productTerm = ""
-    var vm = HomeViewModel()
+    @State var vm = HomeViewModel()
     
     var body: some View {
         VStack {
@@ -27,6 +27,10 @@ struct HomeView: View {
                     Text("토큰 폐기하기")
                 }
                 .padding()
+                
+                Button(action: { Configuration.shared.realTimeToken = nil } ) {
+                    Text("실시간 토큰 폐기하기")
+                }
             }
             .padding()
             
@@ -71,6 +75,7 @@ struct HomeView: View {
                                             Task {
                                                 let response = try await PriceManager.shared.getPricePerMin(productNumber: stockInfo.productCode)
                                                 // TODO: 얻은 가격으로 무엇을 할 것인가?
+                                                vm.watchListInfo[stockInfo] = response
                                                 vm.moveCandidateToWatchList(candidate: stockInfo)
                                             }
                                         } ) {
@@ -101,8 +106,15 @@ struct HomeView: View {
                                         Button(action: { vm.removeWatchList(candidate: stockInfo)} ) {
                                             Text("⬅️")
                                         }
+                                        
+                                        Button(action: { vm.getRealTimeConclusionPrice(productCode: stockInfo.productCode)}) {
+                                            Text("Live")
+                                        }
                                         .padding()
                                         
+                                    }
+                                    .onTapGesture {
+                                        vm.selectedStock = stockInfo
                                     }
                                 }
                             }
@@ -111,6 +123,11 @@ struct HomeView: View {
                 }
                 .padding()
                 .frame(width: Configuration.shared.screenSize.width / 3)
+            }
+        
+            // 여기에 차트
+            if let stockInfo = vm.selectedStock {
+                PriceChartView(data: $vm.watchListInfo[stockInfo])
             }
             
             Spacer()
@@ -146,6 +163,8 @@ struct HomeView: View {
     var candidates = [StockInfo]()
     var searchResult: StockInfo?
     var watchList = [StockInfo]()
+    var watchListInfo = [StockInfo: PricePerMinData]()
+    var selectedStock: StockInfo?
     
     func appendCandidate(candidate: StockInfo) {
         searchResult = nil
@@ -184,6 +203,50 @@ struct HomeView: View {
                 searchResult = try StockInfoManager.shared.getStockFromCode(name: term.uppercased())
             } catch {
                 searchResult = nil
+                print(error.localizedDescription)
+            }
+        }
+    }
+    
+    private var wm: WebSocketManager?
+    private var isConnected = false
+    
+    func getSocketAccessKey() async {
+        do {
+            let data: RealTimeAccessTokenData = try await NetworkManager()
+                .method(method: .POST)
+                .path(.TokenURL(.socket))
+                .addHeader(field: "content-type", value: "application/json; utf-8")
+                .addBody(key: "grant_type", value: "client_credentials")
+                .addBody(key: "appkey", value: Configuration.shared.AppKey)
+                .addBody(key: "secretkey", value: Configuration.shared.AppSecret)
+                .decode()
+            Configuration.shared.realTimeToken = data.approvalKey
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
+    
+    func getRealTimeConclusionPrice(productCode: String) {
+        Task {
+            if Configuration.shared.realTimeToken == nil {
+                await getSocketAccessKey()
+            }
+            do {
+                print(Configuration.shared.realTimeToken)
+                self.wm = try WebSocketManager()
+                    .method(method: .POST)
+                    .path(.SocketURL(.realTimeConclusionPrice))
+                    .addHeader(field: "approval_key", value: Configuration.shared.realTimeToken)
+                    .addHeader(field: "custtype", value: "P")
+                    .addHeader(field: "tr_type", value: "1")
+                    .addHeader(field: "content-type", value: "utf-8")
+                    .addBody(key: "tr_id", value: "H0STCNT0")
+                    .addBody(key: "tr_key", value: productCode)
+                    .openWebSocket {
+                        print(String(data: $0, encoding: .utf8))
+                    }
+            } catch {
                 print(error.localizedDescription)
             }
         }
