@@ -15,7 +15,7 @@ AutoKStock 주식 자동 매매 프로그램 시즌2
 
 
 ## 증권거래 방법
-한국투자증권 KIS Open API [링크](https://apiportal.koreainvestment.com/intro)
+한국투자증권 KIS Open API [공식 홈페에지](https://apiportal.koreainvestment.com/intro) [GitHub](https://github.com/koreainvestment/open-trading-api)
 
 ## 투자전략
 - 구상중
