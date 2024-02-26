@@ -39,14 +39,14 @@ class StockInfoManager {
         }
     }
     
-    func getStockFromName(productCode: String) throws -> StockInfo {
+    func getStockFromCode(productCode: String) throws -> StockInfo {
         guard let num = Int(productCode) else { throw SearchError.codeIsNotNumber }
         let productCode = String(format: "%06d", num)
         guard let name = numToName[productCode] else { throw SearchError.notExist }
         return StockInfo(productCode: productCode, name: name)
     }
     
-    func getStockFromCode(name: String) throws -> StockInfo {
+    func getStockFromName(name: String) throws -> StockInfo {
         guard let productCode = nameToNum[name] else { throw SearchError.notExist }
         return StockInfo(productCode: productCode, name: name)
     }
