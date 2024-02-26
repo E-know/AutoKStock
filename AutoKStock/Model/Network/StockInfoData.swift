@@ -8,7 +8,6 @@
 import Foundation
 
 
-// MARK: - Welcome
 struct StockInfoData: Decodable {
     let output: Output
     let rtCd: String
@@ -16,7 +15,7 @@ struct StockInfoData: Decodable {
     let msg1: String
 }
 
-// MARK: - Output
+
 struct Output: Decodable {
     ///상품번호
     let pdno: String

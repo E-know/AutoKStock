@@ -10,22 +10,25 @@ import Starscream
 
 enum WebSocketError: LocalizedError {
     case invalidURL
+    case webSocketNil
     
     var errorDescription: String? {
         switch self {
         case .invalidURL: "WebSocket Error: URL을 확인해주세요"
+        case .webSocketNil: "WebSocket Nil: register 전에 openWebSocket 함수를 먼저 실행시켜주세요."
         }
     }
 }
 
 final class WebSocketManager {
+    static let shared = WebSocketManager()
     var url: URL?
     var header = [String: String]()
     var body = [String: Any?]()
     var method: HTTPMethod = .POST
     private var webSocket: WebSocket?
     
-    init() {
+    private init() {
         let urlString = if Configuration.shared.ismockEnvironment {
             "ws://ops.koreainvestment.com:31000"
         } else {
@@ -35,43 +38,15 @@ final class WebSocketManager {
         url = URL(string: urlString)
     }
     
-    func path(_ path: URLType) -> Self {
-        url?.append(path: path.path)
-        return self
-    }
-    
-    func method(method: HTTPMethod) -> Self {
-        self.method = method
-        return self
-    }
-    
-    func addHeader(field: String, value: String?) -> Self {
-        header[field] = value
-        return self
-    }
-    
-    func addBody(key: String, value: Any?) -> Self {
-        body[key] = value
-        return self
-    }
-    
-    func openWebSocket(_ handler: @escaping (Data) -> ()) throws -> Self {
-        guard let url = url else { throw WebSocketError.invalidURL }
+    func openWebSocket(path: URLType, _ handler: @escaping (Data) -> ()) throws {
+        guard var url = url else { throw WebSocketError.invalidURL }
+        url.append(path: path.path)
         var request = URLRequest(url: url)
         
-        for (key, value) in header {
-            request.setValue(value, forHTTPHeaderField: key)
-        }
-        
-        request.httpBody = try JSONSerialization.data(withJSONObject: body)
-        request.httpMethod = method.rawValue
-        
-        print(request.description)
         
         self.webSocket = WebSocket(request: request)
         
         webSocket?.onEvent = { event in
-            print(event)
             switch event {
             case .connected(let headers):
                 print("websocket is connected: \(headers)")
@@ -100,11 +75,63 @@ final class WebSocketManager {
         }
         
         webSocket?.connect()
-        
-        return self
     }
     
-    func closeWebSocket() {
+    func register(productNumber: String, _ handler: @escaping () -> ()) throws {
+        guard let webSocket else { throw WebSocketError.webSocketNil }
+        let header: [String: Any?] = [
+            "approval_key": Configuration.shared.realTimeToken,
+            "custtype": "P",
+            "tr_type": "1",
+            "content-type": "utf-8"
+        ]
         
+        let body: [String: Any] = [
+            "input": [
+                "tr_id": "H0STCNT0",
+                "tr_key": productNumber
+            ]
+        ]
+        
+        let requestData: [String: Any] = [
+            "header": header,
+            "body": body
+        ]
+        
+        let data = try JSONSerialization.data(withJSONObject: requestData)
+        
+        // FIXME: 이 부분 handler 작동 안함 아마도 소켓에 응답 받아오는데 실패하는듯 커텍트 성공에 대한게 없음
+        webSocket.write(data: data) {
+            handler()
+        }
+        
+    }
+    
+    func cancellation(productNumber: String) throws {
+        guard let webSocket else { throw WebSocketError.webSocketNil }
+        let header: [String: Any?] = [
+            "approval_key": Configuration.shared.realTimeToken,
+            "custtype": "P",
+            "tr_type": "2",
+            "content-type": "utf-8"
+        ]
+        
+        let body: [String: Any] = [
+            "input": [
+                "tr_id": "H0STCNT0",
+                "tr_key": productNumber
+            ]
+        ]
+        
+        let requestData: [String: Any] = [
+            "header": header,
+            "body": body
+        ]
+        
+        let data = try JSONSerialization.data(withJSONObject: requestData)
+        
+        webSocket.write(data: data) {
+            print("Send Data:", String(data: data, encoding: .utf8) ?? "")
+        }
     }
 }
