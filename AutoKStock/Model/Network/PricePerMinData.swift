@@ -13,6 +13,27 @@ struct PricePerMinData: Decodable {
     let rtCd: String
     let msgCd: String
     let msg1: String
+    
+    // 조회된 데이터 중 최저가
+    var lowestPrice: Int {
+        var value = Int.max
+        
+        for ele in output2 {
+            guard let price = Int(ele.stckLwpr), value > price else { continue }
+            value = price
+        }
+        return value != Int.max ? value : 0
+    }
+    
+    var highestPrice: Int {
+        var value = 0
+        
+        for ele in output2 {
+            guard let price = Int(ele.stckHgpr), value < price else { continue }
+            value = price
+        }
+        return value != 0 ? value : 10_000_000
+    }
 }
 
 // MARK: - PriceTheDayData
@@ -36,7 +57,8 @@ struct PriceTheDayData: Decodable {
 }
 
 // MARK: - PriceMinuteData
-struct PriceMinuteData: Decodable, Hashable {
+struct PriceMinuteData: Decodable, Hashable, Identifiable {
+    var id: String { stckCntgHour }
     ///누적 거래 대금
     let acmlTrPbmn: String
     ///체결 거래량
@@ -53,4 +75,19 @@ struct PriceMinuteData: Decodable, Hashable {
     let stckOprc: String
     ///주식 현재가
     let stckPrpr: String
+    
+    var timeString: String {
+        let df = DateFormatter()
+        df.dateFormat = "HHmmss"
+        let date = df.date(from: stckCntgHour)!
+        df.dateFormat = "HH:mm"
+        
+        return df.string(from: date)
+    }
+    
+    var timeDate: Date {
+        let df = DateFormatter()
+        df.dateFormat = "yyyyMMddHHmmss"
+        return df.date(from: stckBsopDate + stckCntgHour)!
+    }
 }

@@ -1,5 +1,5 @@
 //
-//  FirstSettingView.swift
+//  MockSelectView.swift
 //  AutoKStock
 //
 //  Created by Inho Choi on 2/16/24.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct FirstSettingView: View {
+struct MockSelectView: View {
     @State private var mockEnvironment = true
     @State private var path = [Int]()
 
@@ -27,7 +27,7 @@ struct FirstSettingView: View {
                 }
             }
             .navigationDestination(for: Int.self, destination: { _ in
-                HomeView()
+                MainView()
             })
         }
     }
@@ -48,7 +48,7 @@ struct FirstSettingView: View {
         } else {
             path.append(0)
         }
-    }
+    } 
     
     private func getToken() async throws {
         let response = try await TokenManager.shared.getToken()
@@ -61,5 +61,5 @@ struct FirstSettingView: View {
 }
 
 #Preview {
-    FirstSettingView()
+    MockSelectView()
 }

@@ -47,7 +47,7 @@ struct PriceChartView: View {
                                 AxisGridLine()
                                 let label = value.as(Date.self)!.minute
                                 AxisValueLabel(label)
-                            } else {
+                            } else if Int(value.as(Date.self)!.minute)! % 2 == 0 {
                                 let label = value.as(Date.self)!.minute
                                 AxisValueLabel(label)
                             }

@@ -16,7 +16,7 @@ struct AutoKStockApp: App {
     
     var body: some Scene {
         WindowGroup {
-            FirstSettingView()
+            MockSelectView()
         }
         .onChange(of: scenePhase) { oldPhase, phase in
             print(oldPhase, phase)
