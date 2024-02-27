@@ -7,6 +7,11 @@ AutoKStock 주식 자동 매매 프로그램 시즌2
 
 #### 🚨 `Key.swift` 파일이 있어야 정상 작동합니다. 발급받은 Key를 해당 파일에 넣어주세요.
 
+## 로직
+![240228](https://github.com/E-know/AutoKStock/assets/55151796/1f7e0d30-6d6e-45aa-ae85-cbbd5e55ca6a)
+
+
+
 ## Develop
 - SwiftUI
 - AppKit
