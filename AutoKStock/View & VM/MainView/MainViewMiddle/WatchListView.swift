@@ -42,7 +42,12 @@ struct WatchListView: View {
     private func LiveButton(stockInfo: StockInfo) -> some View {
         let isLive = vm.liveStock.contains(stockInfo.productCode)
         
-        return Button(action: { vm.getRealTimeConclusionPrice(productCode: stockInfo.productCode)
+        return Button(action: { 
+            if isLive {
+                vm.cancelRealTimeConclusionPrice(productCode: stockInfo.productCode)
+            } else {
+                vm.getRealTimeConclusionPrice(productCode: stockInfo.productCode)
+            }
             Task {
                 sleep(10)
                 print(vm.liveStock)

@@ -96,6 +96,15 @@ import Foundation
         }
     }
     
+    func cancelRealTimeConclusionPrice(productCode: String) {
+        do {
+            try WebSocketManager.shared.cancellation(productNumber: productCode)
+            liveStock.remove(productCode)
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
+    
     func getBalcne() async {
         do {
             self.balance = try await OrderManager.shared.fetchBalance()
