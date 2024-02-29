@@ -7,8 +7,6 @@
 
 import Foundation
 
-protocol WebsocketData {}
-
 struct WebSocketResponseData: Decodable, WebsocketData {
     let header: WebSocketResponseBodyHeader
     let body: WebSocketResponseBody?
