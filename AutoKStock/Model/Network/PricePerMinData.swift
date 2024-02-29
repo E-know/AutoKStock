@@ -9,7 +9,7 @@ import Foundation
 
 struct PricePerMinData: Decodable {
     let output1: PriceTheDayData
-    var output2: [PriceMinuteData]
+    var output2: Set<PriceMinuteData>
     let rtCd: String
     let msgCd: String
     let msg1: String
@@ -65,7 +65,7 @@ struct PriceMinuteData: Decodable, Hashable, Identifiable {
     let cntgVol: String
     ///주식 영업 일자
     let stckBsopDate: String
-    ///주식 체결 시간
+    ///주식 체결 시간 ex. 095900
     let stckCntgHour: String
     ///주식 최고가
     let stckHgpr: String
@@ -75,6 +75,14 @@ struct PriceMinuteData: Decodable, Hashable, Identifiable {
     let stckOprc: String
     ///주식 현재가
     let stckPrpr: String
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(stckCntgHour)
+    }
+    
+    static func == (lhs: PriceMinuteData, rhs: PriceMinuteData) -> Bool {
+        return lhs.stckCntgHour == rhs.stckCntgHour
+    }
     
     var timeString: String {
         let df = DateFormatter()

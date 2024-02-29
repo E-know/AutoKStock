@@ -193,4 +193,23 @@ struct ConclusionData {
         MRKT_TRTM_CLS_CODE = line[43]
         VI_STND_PRC = line[44]
     }
+    
+    var toPriceMinuteData: PriceMinuteData {
+        let startIdx = STCK_CNTG_HOUR.startIndex
+        let hour = STCK_CNTG_HOUR[startIdx..<STCK_CNTG_HOUR.index(startIdx, offsetBy: 2)]
+        let min = STCK_CNTG_HOUR[STCK_CNTG_HOUR.index(startIdx, offsetBy: 2)..<STCK_CNTG_HOUR.index(startIdx, offsetBy: 4)]
+        let timeString = String(hour + min) + "00"
+        let data = PriceMinuteData(
+            acmlTrPbmn: ACML_VOL,
+            cntgVol: CNTG_VOL,
+            stckBsopDate: BSOP_DATE,
+            stckCntgHour: timeString,
+            stckHgpr: STCK_HGPR,
+            stckLwpr: STCK_LWPR,
+            stckOprc: STCK_OPRC,
+            stckPrpr: STCK_PRPR
+        )
+        
+        return data
+    }
 }

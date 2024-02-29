@@ -11,7 +11,7 @@ import Foundation
     var candidates = [StockInfo]()
     var searchResult: StockInfo?
     var watchList = [StockInfo]()
-    var watchListInfo = [StockInfo: PricePerMinData]()
+    var watchListInfo = [String: PricePerMinData]()
     var liveStock = Set<String>() // ProductCode
     var selectedStock: StockInfo?
     
@@ -81,8 +81,13 @@ import Foundation
             }
             
             do {
-                try WebSocketManager.shared.openWebSocket(path: .SocketURL(.realTimeConclusionPrice)) { data in
-                    print("Data count \(data.count)")
+                try WebSocketManager.shared.openWebSocket(path: .SocketURL(.realTimeConclusionPrice)) { [productCode, weak self] liveConclusionData in
+                    let priceMinData = Set(liveConclusionData.conclusionData.map{ $0.toPriceMinuteData }.reversed())
+                    
+                    priceMinData.forEach {
+                        self?.watchListInfo[productCode]?.output2.update(with: $0)
+                    }
+
                 }
                 sleep(1) // FIXME: 이 부분이 문제로 생기는 듯 여기서 뭔가 오차가 생김
                 try WebSocketManager.shared.register(productNumber: productCode) { [weak self] in
@@ -129,7 +134,7 @@ import Foundation
     private func getPricePerMinute(stockInfo: StockInfo) async throws {
         let response = try await PriceManager.shared.getPricePerMin(productNumber: stockInfo.productCode)
         // TODO: 얻은 가격으로 무엇을 할 것인가?
-        watchListInfo[stockInfo] = response
+        watchListInfo[stockInfo.productCode] = response
     }
     
     func moveToWatchList(candidate: StockInfo) {

@@ -13,7 +13,7 @@ struct PriceChartView: View {
     var body: some View {
         ScrollView(.horizontal) {
             if let data {
-                Chart(data.output2) {
+                Chart(data.output2.sorted{ $0.stckCntgHour < $1.stckCntgHour }) {
                     BarMark(
                         x: .value("Time", $0.timeDate),
                         yStart: .value("startPrice", Int($0.stckOprc > $0.stckPrpr ? $0.stckPrpr : $0.stckOprc)!),

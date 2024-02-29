@@ -32,7 +32,7 @@ struct MainView: View {
         
             // 여기에 차트
             if let stockInfo = vm.selectedStock {
-                PriceChartView(data: $vm.watchListInfo[stockInfo])
+                PriceChartView(data: $vm.watchListInfo[stockInfo.productCode])
             }
             
             Spacer()

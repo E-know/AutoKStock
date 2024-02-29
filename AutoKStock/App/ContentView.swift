@@ -29,25 +29,6 @@ struct ContentView: View {
     }
     
     private func test() {
-        if let url = Bundle.main.url(forResource: "KOSPI", withExtension: "csv") {
-            do {
-                let csvString = try String(contentsOf: url)
-                let csvLines = csvString.components(separatedBy: .newlines)
-                for line in csvLines where line.count > 0 {
-                    let fields = line.components(separatedBy: ",")
-                    
-                    let name = fields[0]
-                    let key = String(format: "%06d", Int(fields[1])!)
-                    
-                    
-                    // 이제 fields 배열에 각 줄의 필드가 들어있습니다.
-                }
-            } catch {
-                print("Failed to read file: \(error)")
-            }
-        } else {
-            print("File not found")
-        }
     }
 }
 

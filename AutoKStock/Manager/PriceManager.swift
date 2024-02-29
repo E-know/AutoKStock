@@ -81,12 +81,9 @@ class PriceManager {
         }
         
         var response: PricePerMinData = try await network
-            .addQuery(name: "FID_INPUT_HOUR_1", value: Date.now.toString)
+            .addQuery(name: "FID_INPUT_HOUR_1", value: now.toString)
             .decode()
-        data = data.union(response.output2)
-        
-        
-        response.output2 = Array(data).sorted { $0.stckCntgHour < $1.stckCntgHour }
+        response.output2 = data.union(response.output2)
         
         return response
     }

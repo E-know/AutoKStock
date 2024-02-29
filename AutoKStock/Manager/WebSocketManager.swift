@@ -41,8 +41,7 @@ final class WebSocketManager {
     func openWebSocket(path: URLType, _ handler: @escaping (LiveConclusionData) -> ()) throws {
         guard var url = url else { throw WebSocketError.invalidURL }
         url.append(path: path.path)
-        var request = URLRequest(url: url)
-        
+        let request = URLRequest(url: url)
         
         self.webSocket = WebSocket(request: request)
         
@@ -54,7 +53,7 @@ final class WebSocketManager {
                 print("websocket is disconnected: \(reason) with code: \(code)")
             case .text(let string):
                 print("Received text: \(string)")
-                self?.distinguishString(string)
+                let message = self?.distinguishString(string)
             case .binary(let data):
                 print("Received data: \(data.count)")
             case .ping(_):
