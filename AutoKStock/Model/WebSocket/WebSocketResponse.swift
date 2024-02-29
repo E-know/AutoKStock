@@ -16,11 +16,10 @@ struct WebSocketResponseBody: Decodable {
     let rtCd: String
     let msgCd: String
     let msg1: WebSocketResponseBodyMessage
-    let output: WebSocketResponseBodyBodyOutput
+    let output: WebSocketResponseBodyOutput
 }
 
-// MARK: - Output
-struct WebSocketResponseBodyBodyOutput: Decodable {
+struct WebSocketResponseBodyOutput: Decodable {
     let iv: String
     let key: String
 }
