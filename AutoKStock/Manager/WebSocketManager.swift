@@ -38,7 +38,7 @@ final class WebSocketManager {
         url = URL(string: urlString)
     }
     
-    func openWebSocket(path: URLType, _ handler: @escaping (Data) -> ()) throws {
+    func openWebSocket(path: URLType, _ handler: @escaping (LiveConclusionData) -> ()) throws {
         guard var url = url else { throw WebSocketError.invalidURL }
         url.append(path: path.path)
         var request = URLRequest(url: url)
@@ -46,7 +46,7 @@ final class WebSocketManager {
         
         self.webSocket = WebSocket(request: request)
         
-        webSocket?.onEvent = { event in
+        webSocket?.onEvent = { [weak self] event in
             switch event {
             case .connected(let headers):
                 print("websocket is connected: \(headers)")
@@ -54,9 +54,9 @@ final class WebSocketManager {
                 print("websocket is disconnected: \(reason) with code: \(code)")
             case .text(let string):
                 print("Received text: \(string)")
+                self?.distinguishString(string)
             case .binary(let data):
                 print("Received data: \(data.count)")
-                handler(data)
             case .ping(_):
                 break
             case .pong(_):
@@ -133,5 +133,32 @@ final class WebSocketManager {
         webSocket.write(data: data) {
             print("Send Data:", String(data: data, encoding: .utf8) ?? "")
         }
+    }
+    
+    
+    // TODO: Nil -> thorws
+    private func distinguishString(_ str: String) -> WebsocketData? {
+        guard let firstChar = str.first else { return nil }
+        
+        if firstChar == "{" {
+            // JSON
+            guard let data = str.data(using: .utf8) else { return nil }
+            do {
+                let jsonDecoder = JSONDecoder()
+                jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
+                
+                let message = try jsonDecoder.decode(WebSocketResponseData.self, from: data)
+                return message
+            } catch {
+                print(error.localizedDescription)
+            }
+        } else {
+            // 체결 데이터
+            let message = LiveConclusionData(stringData: str)
+            
+            return message
+        }
+        
+        return nil
     }
 }

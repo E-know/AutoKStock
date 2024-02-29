@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct LiveConclusionData {
+struct LiveConclusionData: WebsocketData {
     let encryption: String
     let trId: String
     let dataCount: Int
@@ -24,23 +24,13 @@ struct LiveConclusionData {
         let conclusionLine = line[3].split(separator: "^").map { String($0) }
         
         var conclusionArr = [ConclusionData]()
-        if conclusionLine.count / count == 44 {
-            var idx = 0
-            
-            while idx < conclusionLine.count {
-                guard let conclusionData = ConclusionData(line: conclusionLine[idx..<44]) else { break }
-                conclusionArr.append(conclusionData)
-                idx += 44
-            }
-        } else {
-            var idx = 0
-            
-            while idx < conclusionLine.count {
-                guard let conclusionData = ConclusionData(line: conclusionLine[idx..<45]) else { break }
-                conclusionArr.append(conclusionData)
-                idx += 45
-            }
+        
+        for i in 0..<(conclusionLine.count / 45) {
+            let sliceLine = Array(conclusionLine[(i * 45)..<((i + 1) * 45)])
+            guard let conclusionData = ConclusionData(line: sliceLine) else { break }
+            conclusionArr.append(conclusionData)
         }
+        
         conclusionData = conclusionArr
     }
 }
@@ -155,8 +145,7 @@ struct ConclusionData {
     /// 정적VI발동기준가
     let VI_STND_PRC: String
     
-    init?(line: ArraySlice<String>) {
-        
+    init?(line: [String]) {
         MKSC_SHRN_ISCD = line[0]
         STCK_CNTG_HOUR = line[1]
         STCK_PRPR = line[2]
@@ -201,13 +190,7 @@ struct ConclusionData {
         PRDY_SMNS_HOUR_ACML_VOL = line[40]
         PRDY_SMNS_HOUR_ACML_VOL_RAT = line[41]
         HOUR_CLS_CODE = line[42]
-        
-        if line.count == 44 {
-            MRKT_TRTM_CLS_CODE = ""
-            VI_STND_PRC = line[43]
-        } else {
-            MRKT_TRTM_CLS_CODE = line[43]
-            VI_STND_PRC = line[44]
-        }
+        MRKT_TRTM_CLS_CODE = line[43]
+        VI_STND_PRC = line[44]
     }
 }
