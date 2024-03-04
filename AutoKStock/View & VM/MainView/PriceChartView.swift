@@ -17,7 +17,7 @@ struct PriceChartView: View {
                     BarMark(
                         x: .value("Time", $0.timeDate),
                         yStart: .value("startPrice", Int($0.stckOprc > $0.stckPrpr ? $0.stckPrpr : $0.stckOprc)!),
-                        yEnd: .value("endPrice", Int($0.stckOprc <= $0.stckPrpr ? $0.stckPrpr : $0.stckOprc)!),
+                        yEnd: .value("endPrice", Int($0.stckOprc <= $0.stckPrpr ? $0.stckPrpr : $0.stckOprc)! + 10),
                         width: 10
                     )
                     .foregroundStyle($0.stckOprc > $0.stckPrpr ? Color.blue : Color.red)
