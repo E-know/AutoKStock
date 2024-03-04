@@ -9,7 +9,7 @@ import Foundation
 
 class StockInfoManager {
     private var numToName = [String: String]()
-    private var nameToNum = [String: String]()
+    private var nameToNum = NTree()
     private init() {
         readCSV(name: "KOSPI")
         readCSV(name: "KOSDAQ")
@@ -29,7 +29,7 @@ class StockInfoManager {
                     let key = String(format: "%06d", Int(fields[1])!)
                     
                     numToName[key] = name
-                    nameToNum[name] = key
+                    nameToNum.append(name, productCode: key)
                 }
             } catch {
                 print("Failed to read \(name) file: \(error)")
@@ -39,16 +39,17 @@ class StockInfoManager {
         }
     }
     
-    func getStockFromCode(productCode: String) throws -> StockInfo {
+    func getStockFromCode(productCode: String) throws -> [StockInfo] {
         guard let num = Int(productCode) else { throw SearchError.codeIsNotNumber }
         let productCode = String(format: "%06d", num)
         guard let name = numToName[productCode] else { throw SearchError.notExist }
-        return StockInfo(productCode: productCode, name: name)
+        return [StockInfo(productCode: productCode, name: name)]
     }
     
-    func getStockFromName(name: String) throws -> StockInfo {
-        guard let productCode = nameToNum[name] else { throw SearchError.notExist }
-        return StockInfo(productCode: productCode, name: name)
+    func getStockFromName(name: String) throws -> [StockInfo] {
+        let stockInfo = nameToNum.find(name: name)
+        guard !stockInfo.isEmpty else { throw SearchError.notExist }
+        return stockInfo
     }
 }
 

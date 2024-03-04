@@ -22,7 +22,11 @@ struct SearchView: View {
                 }
             
             if let searchResult = vm.searchResult {
-                SearchResultCell(data: searchResult)
+                List {
+                    ForEach(searchResult, id: \.productCode) {
+                        SearchResultCell(data: $0)
+                    }
+                }
             }
             
             Spacer()

@@ -9,7 +9,7 @@ import Foundation
 
 @Observable final class MainViewModel {
     var candidates = [StockInfo]()
-    var searchResult: StockInfo?
+    var searchResult: [StockInfo]?
     var watchList = [StockInfo]()
     var watchListInfo = [String: PricePerMinData]()
     var liveStock = Set<String>() // ProductCode
