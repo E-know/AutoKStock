@@ -68,13 +68,13 @@ struct PriceMinuteData: Decodable, Hashable, Identifiable {
     ///주식 체결 시간 ex. 095900
     let stckCntgHour: String
     ///주식 최고가
-    let stckHgpr: String
+    var stckHgpr: String
     ///주식 최저가
-    let stckLwpr: String
+    var stckLwpr: String
     ///주식 시가2
     let stckOprc: String
     ///주식 현재가
-    let stckPrpr: String
+    var stckPrpr: String
     
     func hash(into hasher: inout Hasher) {
         hasher.combine(stckCntgHour)

@@ -204,9 +204,9 @@ struct ConclusionData {
             cntgVol: CNTG_VOL,
             stckBsopDate: BSOP_DATE,
             stckCntgHour: timeString,
-            stckHgpr: STCK_HGPR,
-            stckLwpr: STCK_LWPR,
-            stckOprc: STCK_OPRC,
+            stckHgpr: STCK_PRPR,
+            stckLwpr: STCK_PRPR,
+            stckOprc: STCK_PRPR,
             stckPrpr: STCK_PRPR
         )
         

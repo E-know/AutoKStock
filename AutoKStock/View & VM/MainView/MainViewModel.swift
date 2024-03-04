@@ -84,10 +84,20 @@ import Foundation
                 try WebSocketManager.shared.openWebSocket(path: .SocketURL(.realTimeConclusionPrice)) { [productCode, weak self] liveConclusionData in
                     let priceMinData = Set(liveConclusionData.conclusionData.map{ $0.toPriceMinuteData }.reversed())
                     
-                    priceMinData.forEach {
-                        self?.watchListInfo[productCode]?.output2.update(with: $0)
+                    priceMinData.forEach { [productCode, weak self] newValue in
+                        guard let self else { return }
+                        if var oldValue = self.watchListInfo[productCode]?.output2.first(where: { $0.id == newValue.id }) {
+                            oldValue.stckHgpr = max(oldValue.stckHgpr, newValue.stckPrpr)
+                            oldValue.stckLwpr = min(oldValue.stckLwpr, newValue.stckPrpr)
+                            oldValue.stckPrpr = newValue.stckPrpr
+                            self.watchListInfo[productCode]?.output2.update(with: oldValue)
+                            print("Old] \(oldValue.timeDate.toString) \(oldValue.stckPrpr) | \(oldValue.stckHgpr) \(oldValue.stckLwpr)")
+                            
+                        } else {
+                            self.watchListInfo[productCode]?.output2.insert(newValue)
+                            print("New] \(newValue.timeDate.toString) \(newValue.stckPrpr) | \(newValue.stckHgpr) \(newValue.stckLwpr)")
+                        }
                     }
-
                 }
                 sleep(1) // FIXME: 이 부분이 문제로 생기는 듯 여기서 뭔가 오차가 생김
                 try WebSocketManager.shared.register(productNumber: productCode) { [weak self] in

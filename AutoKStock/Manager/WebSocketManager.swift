@@ -52,8 +52,19 @@ final class WebSocketManager {
             case .disconnected(let reason, let code):
                 print("websocket is disconnected: \(reason) with code: \(code)")
             case .text(let string):
-                print("Received text: \(string)")
-                let message = self?.distinguishString(string)
+//                print("Received text: \(string)")
+                guard let message = self?.distinguishString(string) else { return }
+                
+                if let liveConclusionData = message as? LiveConclusionData {
+                    handler(liveConclusionData)
+                } else if let webSocketResponseData = message as? WebSocketResponseData {
+                    if webSocketResponseData.header.trId == .Pingpong {
+                        print("PINGPOING")
+                    } else if webSocketResponseData.header.trId == .LiveConclusion {
+                        print(webSocketResponseData.body?.msg1)
+                    }
+                }
+                
             case .binary(let data):
                 print("Received data: \(data.count)")
             case .ping(_):
@@ -153,7 +164,7 @@ final class WebSocketManager {
             }
         } else {
             // 체결 데이터
-            let message = LiveConclusionData(stringData: str)
+            let message = LiveConclusionData(stringData: str) // Decode
             
             return message
         }
